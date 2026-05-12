@@ -1,0 +1,125 @@
+<div class="flex w-full overflow-hidden">
+  <!-- Main Content -->
+  <div class="flex-1 p-4 md:p-8 pb-32 w-full max-w-full">
+    <!-- Header & Filters -->
+    <form [formGroup]="filterForm" (ngSubmit)="applyFilters()" class="glass-panel p-4 md:p-6 rounded-xl mb-6 border border-outline-variant/30 flex flex-col gap-4 w-full">
+      <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 w-full">
+        <div class="max-w-full">
+          <h1 class="text-2xl md:text-3xl font-black text-primary-fixed uppercase tracking-tight leading-none wrap-break-words">Digital Explorer</h1>
+          <p class="font-mono text-on-surface-variant text-xs md:text-sm mt-1">CATALOGING ORGANISMS IN SECTOR_07</p>
+        </div>
+        <div class="flex w-full lg:max-w-md gap-2">
+          <input type="text" formControlName="name" placeholder="Search by name..." class="flex-1 w-full min-w-0 bg-surface-container-highest/50 border border-outline-variant/50 text-on-surface rounded-full px-4 py-2 font-mono text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+          <button type="submit" class="bg-primary-fixed text-on-primary-fixed px-4 md:px-6 py-2 rounded-full font-bold tracking-wider text-xs hover:bg-primary transition-colors flex items-center gap-2 shrink-0">
+            <span class="material-symbols-outlined text-[18px]">search</span>
+            <span class="hidden sm:inline">SEARCH</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Secondary Filters -->
+      <div class="flex flex-wrap items-center gap-3 md:gap-4 pt-4 border-t border-outline-variant/30 w-full">
+        <!-- Exact Match Switch -->
+        <label class="flex items-center gap-2 cursor-pointer group shrink-0">
+          <input type="checkbox" formControlName="exact" class="w-4 h-4 rounded text-primary-fixed border-outline-variant focus:ring-primary bg-surface-container-highest">
+          <span class="font-bold tracking-wider text-[10px] md:text-xs text-on-surface-variant group-hover:text-primary transition-colors">EXACT MATCH</span>
+        </label>
+        
+        <!-- X-Antibody Switch -->
+        <label class="flex items-center gap-2 cursor-pointer group shrink-0">
+          <input type="checkbox" formControlName="xAntibody" class="w-4 h-4 rounded text-primary-fixed border-outline-variant focus:ring-primary bg-surface-container-highest">
+          <span class="font-bold tracking-wider text-[10px] md:text-xs text-on-surface-variant group-hover:text-primary transition-colors">X-ANTIBODY</span>
+        </label>
+
+        <!-- Attribute Select -->
+        <select formControlName="attribute" class="bg-surface-container-highest/50 border border-outline-variant/50 text-on-surface rounded-full px-3 py-1.5 font-bold tracking-wider text-[10px] md:text-xs focus:outline-none focus:border-primary cursor-pointer shrink-0 max-w-[140px] md:max-w-none">
+          <option value="">ALL ATTRIBUTES</option>
+          @for(attr of attributes; track attr) {
+            <option [value]="attr">{{attr | uppercase}}</option>
+          }
+        </select>
+
+        <!-- Level Select -->
+        <select formControlName="level" class="bg-surface-container-highest/50 border border-outline-variant/50 text-on-surface rounded-full px-3 py-1.5 font-bold tracking-wider text-[10px] md:text-xs focus:outline-none focus:border-primary cursor-pointer shrink-0 max-w-[140px] md:max-w-none">
+          <option value="">ALL LEVELS</option>
+          @for(lvl of levels; track lvl) {
+            <option [value]="lvl">{{lvl | uppercase}}</option>
+          }
+        </select>
+        
+        <!-- Page Size Select -->
+        <div class="sm:ml-auto flex items-center gap-2 shrink-0">
+          <span class="font-bold tracking-wider text-[10px] md:text-xs text-on-surface-variant hidden sm:block">PAGE SIZE:</span>
+          <select formControlName="pageSize" (change)="applyFilters()" class="bg-surface-container-highest/50 border border-outline-variant/50 text-on-surface rounded-full px-3 py-1.5 font-bold tracking-wider text-[10px] md:text-xs focus:outline-none focus:border-primary cursor-pointer">
+            <option [value]="10">10</option>
+            <option [value]="20">20</option>
+            <option [value]="50">50</option>
+          </select>
+        </div>
+      </div>
+    </form>
+
+    <!-- Bento Grid of Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+      
+      @if (loading()) {
+        <!-- Loading Skeletons -->
+        @for (item of [1,2,3,4,5,6,7,8]; track $index) {
+          <div class="glass-panel p-4 relative overflow-hidden animate-pulse">
+            <div class="mb-4 aspect-square bg-surface-container-highest/50 rounded"></div>
+            <div class="h-6 bg-surface-container-highest/50 rounded w-3/4 mb-2"></div>
+            <div class="h-4 bg-surface-container-highest/50 rounded w-full"></div>
+          </div>
+        }
+      } @else {
+        <!-- Dynamic Digimon Cards -->
+        @for (digimon of digimons(); track digimon.id) {
+          <div class="glass-panel p-4 relative group transition-all duration-300 card-glow overflow-hidden">
+            <!-- Note: Level and Type are not returned in the list API, using placeholders -->
+            <div class="absolute top-0 right-0 p-2 bg-tertiary-container/20 text-tertiary-container font-bold tracking-wider text-[10px] border-l border-b border-tertiary-container/30">DATA</div>
+            
+            <div class="mb-4 aspect-square relative overflow-hidden bg-surface-container-highest flex items-center justify-center p-4">
+              <img [alt]="digimon.name" class="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-500 scale-110 group-hover:scale-100 drop-shadow-xl" [src]="digimon.image" loading="lazy" />
+            </div>
+            
+            <div class="space-y-1">
+              <h3 class="text-xl font-bold text-primary tracking-wide uppercase truncate" [title]="digimon.name">{{ digimon.name }}</h3>
+              <div class="flex items-center justify-between font-mono text-xs text-on-surface-variant">
+                <span class="text-primary-fixed-dim">ID: #{{ digimon.id | number:'3.0-0' }}</span>
+              </div>
+            </div>
+            
+            <div class="mt-4 flex gap-2">
+              <div class="h-1 flex-1 bg-outline-variant/30 overflow-hidden">
+                <div class="h-full bg-primary w-[50%] shadow-[0_0_8px_var(--glow-color)]"></div>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="col-span-full py-12 text-center text-on-surface-variant font-mono">
+            NO UNITS FOUND IN CURRENT SECTOR.
+          </div>
+        }
+      }
+    </div>
+
+    <!-- Pagination Footer -->
+    @if(pageable(); as pageInfo) {
+      @if(pageInfo.totalPages > 1) {
+        <div class="mt-8 flex justify-center items-center gap-4 glass-panel py-3 px-6 rounded-full w-fit mx-auto border border-outline-variant/30">
+          <button (click)="changePage(pageInfo.currentPage - 1)" [disabled]="pageInfo.currentPage === 0" class="text-on-surface-variant hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center">
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          
+          <span class="font-mono text-xs text-on-surface">
+            PAGE <span class="text-primary-fixed">{{pageInfo.currentPage + 1}}</span> OF {{pageInfo.totalPages}}
+          </span>
+
+          <button (click)="changePage(pageInfo.currentPage + 1)" [disabled]="pageInfo.currentPage >= pageInfo.totalPages - 1" class="text-on-surface-variant hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+      }
+    }
+  </div>
+</div>
