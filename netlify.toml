@@ -1,7 +1,6 @@
 [build]
-# base = "digidex"
-  command = "ng build"
-  publish = "dist/digidex/browser"
+  command = "npm run build"
+  publish = "dist/DigiDex/browser"
 
 [[redirects]]
   from = "/*"
