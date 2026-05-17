@@ -1,6 +1,7 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { DigimonService } from '../../../core/services/digimon.service';
 import { Digimon, Pageable, DigimonQueryParams } from '../../../core/models/digimon.model';
 
@@ -13,6 +14,7 @@ import { Digimon, Pageable, DigimonQueryParams } from '../../../core/models/digi
 export class ListComponent implements OnInit {
   private readonly digimonService = inject(DigimonService);
   private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
   
   public digimons = signal<Digimon[]>([]);
   public loading = signal<boolean>(true);
@@ -33,6 +35,39 @@ export class ListComponent implements OnInit {
   public attributes = ['Data', 'Vaccine', 'Virus', 'Free', 'Variable', 'Unknown'];
   public levels = ['Baby', 'In-Training', 'Rookie', 'Champion', 'Ultimate', 'Mega', 'Armor'];
 
+  public paginationRange = computed(() => {
+    const pageInfo = this.pageable();
+    if (!pageInfo) return [];
+    
+    const current = pageInfo.currentPage + 1; // 1-indexed for display
+    const total = pageInfo.totalPages;
+    const delta = 1; // numbers around current
+    
+    const range: number[] = [];
+    const rangeWithDots: (number | string)[] = [];
+    let l: number | undefined;
+
+    for (let i = 1; i <= total; i++) {
+      if (i == 1 || i == total || (i >= current - delta && i <= current + delta)) {
+        range.push(i);
+      }
+    }
+
+    for (let i of range) {
+      if (l !== undefined) {
+        if (i - l === 2) {
+          rangeWithDots.push(l + 1);
+        } else if (i - l !== 1) {
+          rangeWithDots.push('...');
+        }
+      }
+      rangeWithDots.push(i);
+      l = i;
+    }
+
+    return rangeWithDots;
+  });
+
   ngOnInit(): void {
     this.loadDigimons();
   }
@@ -43,8 +78,31 @@ export class ListComponent implements OnInit {
   }
 
   changePage(newPage: number): void {
+    const pageInfo = this.pageable();
+    if (!pageInfo) return;
+
+    if (newPage < 0 || newPage >= pageInfo.totalPages) {
+      // Out of bounds -> redirect to 404
+      this.router.navigate(['/404']);
+      return;
+    }
+
     this.currentPage.set(newPage);
     this.loadDigimons();
+    
+    // Scroll to the top of the page to see the new results
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  onPageJump(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const pageStr = input.value.trim();
+    if (!pageStr) return;
+    
+    const pageNum = parseInt(pageStr, 10);
+    if (!isNaN(pageNum)) {
+      this.changePage(pageNum - 1);
+    }
   }
 
   loadDigimons(): void {
@@ -66,6 +124,13 @@ export class ListComponent implements OnInit {
       next: (response) => {
         this.digimons.set(response.content);
         this.pageable.set(response.pageable);
+        
+        // Failsafe: if we filtered and the current page is beyond the new total
+        if (this.currentPage() > 0 && response.pageable.totalPages > 0 && this.currentPage() >= response.pageable.totalPages) {
+          this.currentPage.set(0);
+          this.loadDigimons();
+        }
+
         this.loading.set(false);
       },
       error: (error) => {
@@ -77,5 +142,4 @@ export class ListComponent implements OnInit {
     });
   }
 }
-
 

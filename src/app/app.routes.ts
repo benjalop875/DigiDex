@@ -8,6 +8,10 @@ export const routes: Routes = [
       {
         path: '',
         loadComponent: () => import('./features/explorer/list/list.component').then(m => m.ListComponent)
+      },
+      {
+        path: '**',
+        loadComponent: () => import('./features/not-found/not-found.component').then(m => m.NotFoundComponent)
       }
     ]
   }
