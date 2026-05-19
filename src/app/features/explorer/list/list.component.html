@@ -9,8 +9,8 @@
           <p class="font-mono text-on-surface-variant text-xs md:text-sm mt-1">CATALOGING ORGANISMS IN SECTOR_07</p>
         </div>
         <div class="flex w-full lg:max-w-md gap-2">
-          <input type="text" formControlName="name" placeholder="Search by name..." class="flex-1 w-full min-w-0 bg-surface-container-highest/50 border border-outline-variant/50 text-on-surface rounded-full px-4 py-2 font-mono text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
-          <button type="submit" class="bg-primary-fixed text-on-primary-fixed px-4 md:px-6 py-2 rounded-full font-bold tracking-wider text-xs hover:bg-primary transition-colors flex items-center gap-2 shrink-0">
+          <input type="text" formControlName="name" aria-label="Search Digimon by name" placeholder="Search by name..." class="flex-1 w-full min-w-0 bg-surface-container-highest/50 border border-outline-variant/50 text-on-surface rounded-full px-4 py-2 font-mono text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+          <button type="submit" aria-label="Submit Search" class="bg-primary-fixed text-on-primary-fixed px-4 md:px-6 py-2 rounded-full font-bold tracking-wider text-xs hover:bg-primary transition-colors flex items-center gap-2 shrink-0">
             <span class="material-symbols-outlined text-[18px]">search</span>
             <span class="hidden sm:inline">SEARCH</span>
           </button>
@@ -20,37 +20,79 @@
       <!-- Secondary Filters -->
       <div class="flex flex-wrap items-center gap-3 md:gap-4 pt-4 border-t border-outline-variant/30 w-full">
         <!-- Exact Match Switch -->
-        <label class="flex items-center gap-2 cursor-pointer group shrink-0">
-          <input type="checkbox" formControlName="exact" class="w-4 h-4 rounded text-primary-fixed border-outline-variant focus:ring-primary bg-surface-container-highest">
+        <label for="exactMatch" class="flex items-center gap-2 cursor-pointer group shrink-0">
+          <input type="checkbox" id="exactMatch" formControlName="exact" class="w-4 h-4 rounded text-primary-fixed border-outline-variant focus:ring-primary bg-surface-container-highest">
           <span class="font-bold tracking-wider text-[10px] md:text-xs text-on-surface-variant group-hover:text-primary transition-colors">EXACT MATCH</span>
         </label>
         
         <!-- X-Antibody Switch -->
-        <label class="flex items-center gap-2 cursor-pointer group shrink-0">
-          <input type="checkbox" formControlName="xAntibody" class="w-4 h-4 rounded text-primary-fixed border-outline-variant focus:ring-primary bg-surface-container-highest">
+        <label for="xAntibody" class="flex items-center gap-2 cursor-pointer group shrink-0">
+          <input type="checkbox" id="xAntibody" formControlName="xAntibody" class="w-4 h-4 rounded text-primary-fixed border-outline-variant focus:ring-primary bg-surface-container-highest">
           <span class="font-bold tracking-wider text-[10px] md:text-xs text-on-surface-variant group-hover:text-primary transition-colors">X-ANTIBODY</span>
         </label>
 
-        <!-- Attribute Select -->
-        <select formControlName="attribute" class="bg-surface-container-highest/50 border border-outline-variant/50 text-on-surface rounded-full px-3 py-1.5 font-bold tracking-wider text-[10px] md:text-xs focus:outline-none focus:border-primary cursor-pointer shrink-0 max-w-[140px] md:max-w-none">
-          <option value="">ALL ATTRIBUTES</option>
-          @for(attr of attributes; track attr) {
-            <option [value]="attr">{{attr | uppercase}}</option>
+        <!-- Attribute Custom Dropdown -->
+        <div class="relative shrink-0 w-full sm:w-auto min-w-[140px]">
+          <button type="button" aria-label="Filter by Attribute" (click)="toggleAttributeDropdown($event)" class="w-full bg-surface-container-highest/50 border border-outline-variant/50 text-on-surface rounded-full px-4 py-1.5 font-bold tracking-wider text-[10px] md:text-xs focus:outline-none focus:border-primary cursor-pointer flex items-center justify-between gap-2">
+            <span>{{ filterForm.value.attribute ? filterForm.value.attribute : 'ALL ATTRIBUTES' | uppercase }}</span>
+            <span class="material-symbols-outlined text-[16px]">expand_more</span>
+          </button>
+          
+          @if (isAttributeOpen()) {
+            <ul class="absolute top-full left-0 mt-2 w-48 bg-surface-container border border-outline-variant/30 rounded-xl shadow-2xl overflow-hidden z-[60] flex flex-col max-h-60 overflow-y-auto card-glow">
+              <li>
+                <button type="button" (click)="selectAttribute('')" class="w-full text-left px-4 py-2 hover:bg-primary/20 text-[10px] md:text-xs font-bold text-on-surface transition-colors border-b border-outline-variant/20">ALL ATTRIBUTES</button>
+              </li>
+              @for(attr of attributesList(); track attr.id) {
+                <li>
+                  <button type="button" 
+                          (click)="selectAttribute(attr.name)"
+                          (mouseenter)="showTooltip($event, 'attribute', attr.id)"
+                          (mouseleave)="hideTooltip()"
+                          (touchstart)="showTooltip($event, 'attribute', attr.id)"
+                          (touchend)="hideTooltip()"
+                          class="w-full text-left px-4 py-2 hover:bg-primary/20 text-[10px] md:text-xs font-bold text-on-surface transition-colors border-b border-outline-variant/20 last:border-0">
+                    {{ attr.name | uppercase }}
+                  </button>
+                </li>
+              }
+            </ul>
           }
-        </select>
+        </div>
 
-        <!-- Level Select -->
-        <select formControlName="level" class="bg-surface-container-highest/50 border border-outline-variant/50 text-on-surface rounded-full px-3 py-1.5 font-bold tracking-wider text-[10px] md:text-xs focus:outline-none focus:border-primary cursor-pointer shrink-0 max-w-[140px] md:max-w-none">
-          <option value="">ALL LEVELS</option>
-          @for(lvl of levels; track lvl) {
-            <option [value]="lvl">{{lvl | uppercase}}</option>
+        <!-- Level Custom Dropdown -->
+        <div class="relative shrink-0 w-full sm:w-auto min-w-[140px]">
+          <button type="button" aria-label="Filter by Level" (click)="toggleLevelDropdown($event)" class="w-full bg-surface-container-highest/50 border border-outline-variant/50 text-on-surface rounded-full px-4 py-1.5 font-bold tracking-wider text-[10px] md:text-xs focus:outline-none focus:border-primary cursor-pointer flex items-center justify-between gap-2">
+            <span>{{ filterForm.value.level ? filterForm.value.level : 'ALL LEVELS' | uppercase }}</span>
+            <span class="material-symbols-outlined text-[16px]">expand_more</span>
+          </button>
+          
+          @if (isLevelOpen()) {
+            <ul class="absolute top-full left-0 mt-2 w-48 bg-surface-container border border-outline-variant/30 rounded-xl shadow-2xl overflow-hidden z-[60] flex flex-col max-h-60 overflow-y-auto card-glow">
+              <li>
+                <button type="button" (click)="selectLevel('')" class="w-full text-left px-4 py-2 hover:bg-primary/20 text-[10px] md:text-xs font-bold text-on-surface transition-colors border-b border-outline-variant/20">ALL LEVELS</button>
+              </li>
+              @for(lvl of levelsList(); track lvl.id) {
+                <li>
+                  <button type="button" 
+                          (click)="selectLevel(lvl.name)"
+                          (mouseenter)="showTooltip($event, 'level', lvl.id)"
+                          (mouseleave)="hideTooltip()"
+                          (touchstart)="showTooltip($event, 'level', lvl.id)"
+                          (touchend)="hideTooltip()"
+                          class="w-full text-left px-4 py-2 hover:bg-primary/20 text-[10px] md:text-xs font-bold text-on-surface transition-colors border-b border-outline-variant/20 last:border-0">
+                    {{ lvl.name | uppercase }}
+                  </button>
+                </li>
+              }
+            </ul>
           }
-        </select>
+        </div>
         
         <!-- Page Size Select -->
         <div class="sm:ml-auto flex items-center gap-2 shrink-0">
-          <span class="font-bold tracking-wider text-[10px] md:text-xs text-on-surface-variant hidden sm:block">PAGE SIZE:</span>
-          <select formControlName="pageSize" (change)="applyFilters()" class="bg-surface-container-highest/50 border border-outline-variant/50 text-on-surface rounded-full px-3 py-1.5 font-bold tracking-wider text-[10px] md:text-xs focus:outline-none focus:border-primary cursor-pointer">
+          <label for="pageSize" class="font-bold tracking-wider text-[10px] md:text-xs text-on-surface-variant hidden sm:block">PAGE SIZE:</label>
+          <select id="pageSize" formControlName="pageSize" (change)="applyFilters()" class="bg-surface-container-highest/50 border border-outline-variant/50 text-on-surface rounded-full px-3 py-1.5 font-bold tracking-wider text-[10px] md:text-xs focus:outline-none focus:border-primary cursor-pointer">
             <option [value]="10">10</option>
             <option [value]="20">20</option>
             <option [value]="50">50</option>
@@ -74,10 +116,11 @@
       } @else {
         <!-- Dynamic Digimon Cards -->
         @for (digimon of digimons(); track digimon.id) {
-          @defer (on viewport) {
+          @if ($index < 4) {
+            <!-- Eagerly Loaded for LCP -->
             <div class="glass-panel p-4 relative group transition-all duration-300 card-glow overflow-hidden">
               <div class="mb-4 aspect-square relative overflow-hidden bg-surface-container-highest flex items-center justify-center p-4">
-                <img [alt]="digimon.name" class="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-500 scale-110 group-hover:scale-100 drop-shadow-xl" [src]="digimon.image" loading="lazy" />
+                <img [alt]="digimon.name" class="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-500 scale-110 group-hover:scale-100 drop-shadow-xl" [src]="digimon.image" fetchpriority="high" loading="eager" />
               </div>
               
               <div class="space-y-1">
@@ -93,13 +136,35 @@
                 </div>
               </div>
             </div>
-          } @placeholder {
-            <!-- Skeleton placeholder while waiting to scroll into view -->
-            <div class="glass-panel p-4 relative overflow-hidden animate-pulse">
-              <div class="mb-4 aspect-square bg-surface-container-highest/50 rounded"></div>
-              <div class="h-6 bg-surface-container-highest/50 rounded w-3/4 mb-2"></div>
-              <div class="h-4 bg-surface-container-highest/50 rounded w-full"></div>
-            </div>
+          } @else {
+            <!-- Deferred for Performance -->
+            @defer (on viewport) {
+              <div class="glass-panel p-4 relative group transition-all duration-300 card-glow overflow-hidden">
+                <div class="mb-4 aspect-square relative overflow-hidden bg-surface-container-highest flex items-center justify-center p-4">
+                  <img [alt]="digimon.name" class="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-500 scale-110 group-hover:scale-100 drop-shadow-xl" [src]="digimon.image" loading="lazy" />
+                </div>
+                
+                <div class="space-y-1">
+                  <h3 class="text-xl font-bold text-primary tracking-wide uppercase truncate" [title]="digimon.name">{{ digimon.name }}</h3>
+                  <div class="flex items-center justify-between font-mono text-xs text-on-surface-variant">
+                    <span class="text-primary-fixed-dim">ID: #{{ digimon.id | number:'3.0-0' }}</span>
+                  </div>
+                </div>
+                
+                <div class="mt-4 flex gap-2">
+                  <div class="h-1 flex-1 bg-outline-variant/30 overflow-hidden">
+                    <div class="h-full bg-primary w-[50%] shadow-[0_0_8px_var(--glow-color)]"></div>
+                  </div>
+                </div>
+              </div>
+            } @placeholder {
+              <!-- Skeleton placeholder while waiting to scroll into view -->
+              <div class="glass-panel p-4 relative overflow-hidden animate-pulse">
+                <div class="mb-4 aspect-square bg-surface-container-highest/50 rounded"></div>
+                <div class="h-6 bg-surface-container-highest/50 rounded w-3/4 mb-2"></div>
+                <div class="h-4 bg-surface-container-highest/50 rounded w-full"></div>
+              </div>
+            }
           }
         } @empty {
           <div class="col-span-full py-12 text-center text-on-surface-variant font-mono">
@@ -157,3 +222,21 @@
     }
   </div>
 </div>
+
+<!-- Dynamic Tooltip Overlay -->
+@if(activeTooltip(); as tooltip) {
+  <div class="fixed z-[100] w-64 p-4 glass-panel bg-surface-container-highest/95 rounded-xl border border-primary/30 shadow-[0_4px_25px_var(--glow-color)] pointer-events-none transition-opacity duration-200"
+       [style.top.px]="tooltip.top"
+       [style.left.px]="tooltip.left"
+       style="transform: translateY(-50%);">
+    @if(tooltip.loading) {
+      <div class="animate-pulse space-y-2">
+        <div class="h-3 bg-on-surface-variant/30 rounded w-3/4"></div>
+        <div class="h-3 bg-on-surface-variant/30 rounded w-full"></div>
+        <div class="h-3 bg-on-surface-variant/30 rounded w-5/6"></div>
+      </div>
+    } @else {
+      <p class="text-[11px] text-on-surface font-medium leading-relaxed">{{ tooltip.text }}</p>
+    }
+  </div>
+}

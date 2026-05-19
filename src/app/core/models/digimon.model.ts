@@ -28,3 +28,24 @@ export interface DigimonQueryParams {
   page?: number;
   pageSize?: number;
 }
+
+export interface DigiApiField {
+  id: number;
+  name: string;
+  href: string;
+}
+
+export interface DigiApiListResponse {
+  content: {
+    name: string;
+    description: string;
+    fields: DigiApiField[];
+  };
+  pageable: Pageable;
+}
+
+export interface DigiApiDetailResponse {
+  id: number;
+  name: string;
+  description: string;
+}

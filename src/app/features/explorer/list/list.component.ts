@@ -1,9 +1,9 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, HostListener, ElementRef } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DigimonService } from '../../../core/services/digimon.service';
-import { Digimon, Pageable, DigimonQueryParams } from '../../../core/models/digimon.model';
+import { Digimon, Pageable, DigimonQueryParams, DigiApiField } from '../../../core/models/digimon.model';
 
 @Component({
   selector: 'app-list',
@@ -15,6 +15,7 @@ export class ListComponent implements OnInit {
   private readonly digimonService = inject(DigimonService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly eRef = inject(ElementRef);
   
   public digimons = signal<Digimon[]>([]);
   public loading = signal<boolean>(true);
@@ -31,9 +32,17 @@ export class ListComponent implements OnInit {
 
   public currentPage = signal<number>(0);
 
-  // Static options for filters
-  public attributes = ['Data', 'Vaccine', 'Virus', 'Free', 'Variable', 'Unknown'];
-  public levels = ['Baby', 'In-Training', 'Rookie', 'Champion', 'Ultimate', 'Mega', 'Armor'];
+  // Dynamic options from API
+  public attributesList = signal<DigiApiField[]>([]);
+  public levelsList = signal<DigiApiField[]>([]);
+
+  // Dropdown States
+  public isAttributeOpen = signal<boolean>(false);
+  public isLevelOpen = signal<boolean>(false);
+
+  // Tooltip State
+  public activeTooltip = signal<{text: string, loading: boolean, top: number, left: number} | null>(null);
+  private hoverTimeout: any;
 
   public paginationRange = computed(() => {
     const pageInfo = this.pageable();
@@ -68,8 +77,86 @@ export class ListComponent implements OnInit {
     return rangeWithDots;
   });
 
+  @HostListener('document:click', ['$event'])
+  clickout(event: Event) {
+    if(!this.eRef.nativeElement.contains(event.target)) {
+      this.isAttributeOpen.set(false);
+      this.isLevelOpen.set(false);
+    }
+  }
+
   ngOnInit(): void {
     this.loadDigimons();
+    this.loadFilterOptions();
+  }
+
+  loadFilterOptions(): void {
+    this.digimonService.getAttributes().subscribe({
+      next: (res) => this.attributesList.set(res)
+    });
+    this.digimonService.getLevels().subscribe({
+      next: (res) => this.levelsList.set(res)
+    });
+  }
+
+  // Dropdown UI Methods
+  toggleAttributeDropdown(event?: Event) {
+    if(event) { event.preventDefault(); event.stopPropagation(); }
+    this.isAttributeOpen.set(!this.isAttributeOpen());
+    this.isLevelOpen.set(false);
+  }
+
+  toggleLevelDropdown(event?: Event) {
+    if(event) { event.preventDefault(); event.stopPropagation(); }
+    this.isLevelOpen.set(!this.isLevelOpen());
+    this.isAttributeOpen.set(false);
+  }
+
+  selectAttribute(val: string) {
+    this.filterForm.patchValue({attribute: val});
+    this.isAttributeOpen.set(false);
+    this.activeTooltip.set(null); // Fix: hide tooltip on selection
+    this.applyFilters();
+  }
+
+  selectLevel(val: string) {
+    this.filterForm.patchValue({level: val});
+    this.isLevelOpen.set(false);
+    this.activeTooltip.set(null); // Fix: hide tooltip on selection
+    this.applyFilters();
+  }
+
+  // Tooltip Logic
+  showTooltip(event: MouseEvent | TouchEvent, type: 'attribute' | 'level', id: number) {
+    clearTimeout(this.hoverTimeout);
+    
+    const target = (event.currentTarget as HTMLElement);
+    const rect = target.getBoundingClientRect();
+    
+    this.activeTooltip.set({ 
+      text: '', 
+      loading: true, 
+      top: rect.top + window.scrollY, // Position near the item
+      left: rect.right + window.scrollX + 10 // to the right of the item
+    });
+
+    if (type === 'attribute') {
+      this.digimonService.getAttributeDescription(id).subscribe(res => {
+        const text = typeof res === 'string' ? res : res.description;
+        this.activeTooltip.update(t => t ? { ...t, text, loading: false } : null);
+      });
+    } else {
+      this.digimonService.getLevelDescription(id).subscribe(res => {
+         const text = typeof res === 'string' ? res : res.description;
+         this.activeTooltip.update(t => t ? { ...t, text, loading: false } : null);
+      });
+    }
+  }
+
+  hideTooltip() {
+    this.hoverTimeout = setTimeout(() => {
+      this.activeTooltip.set(null);
+    }, 150);
   }
 
   applyFilters(): void {
@@ -82,15 +169,12 @@ export class ListComponent implements OnInit {
     if (!pageInfo) return;
 
     if (newPage < 0 || newPage >= pageInfo.totalPages) {
-      // Out of bounds -> redirect to 404
       this.router.navigate(['/404']);
       return;
     }
 
     this.currentPage.set(newPage);
     this.loadDigimons();
-    
-    // Scroll to the top of the page to see the new results
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -125,7 +209,6 @@ export class ListComponent implements OnInit {
         this.digimons.set(response.content);
         this.pageable.set(response.pageable);
         
-        // Failsafe: if we filtered and the current page is beyond the new total
         if (this.currentPage() > 0 && response.pageable.totalPages > 0 && this.currentPage() >= response.pageable.totalPages) {
           this.currentPage.set(0);
           this.loadDigimons();

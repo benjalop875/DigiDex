@@ -1,20 +1,21 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { DigimonResponse, DigimonQueryParams } from '../models/digimon.model';
+import { Observable, of, forkJoin } from 'rxjs';
+import { tap, map } from 'rxjs/operators';
+import { DigimonResponse, DigimonQueryParams, DigiApiListResponse, DigiApiDetailResponse, DigiApiField } from '../models/digimon.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DigimonService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'https://digi-api.com/api/v1/digimon';
+  private readonly apiUrl = 'https://digi-api.com/api/v1';
+
+  // Cache for descriptions
+  private readonly detailCache = new Map<string, string>();
 
   /**
    * Fetches a paginated list of digimons based on the provided query parameters.
-   * 
-   * @param params Query parameters for filtering and pagination.
-   * @returns An Observable of DigimonResponse.
    */
   getDigimons(params?: DigimonQueryParams): Observable<DigimonResponse> {
     let httpParams = new HttpParams();
@@ -29,6 +30,46 @@ export class DigimonService {
       if (params.pageSize !== undefined) httpParams = httpParams.set('pageSize', params.pageSize.toString());
     }
 
-    return this.http.get<DigimonResponse>(this.apiUrl, { params: httpParams });
+    return this.http.get<DigimonResponse>(`${this.apiUrl}/digimon`, { params: httpParams });
+  }
+
+  getLevels(): Observable<DigiApiField[]> {
+    // The API forces pagination of 5 items per page, so we fetch both page 0 and 1
+    return forkJoin([
+      this.http.get<DigiApiListResponse>(`${this.apiUrl}/level?page=0`),
+      this.http.get<DigiApiListResponse>(`${this.apiUrl}/level?page=1`)
+    ]).pipe(
+      map(responses => [...responses[0].content.fields, ...responses[1].content.fields])
+    );
+  }
+
+  getAttributes(): Observable<DigiApiField[]> {
+    // The API forces pagination of 5 items per page, so we fetch both page 0 and 1
+    return forkJoin([
+      this.http.get<DigiApiListResponse>(`${this.apiUrl}/attribute?page=0`),
+      this.http.get<DigiApiListResponse>(`${this.apiUrl}/attribute?page=1`)
+    ]).pipe(
+      map(responses => [...responses[0].content.fields, ...responses[1].content.fields])
+    );
+  }
+
+  getLevelDescription(idOrName: string | number): Observable<DigiApiDetailResponse | string> {
+    const cacheKey = `level-${idOrName}`;
+    if (this.detailCache.has(cacheKey)) {
+      return of(this.detailCache.get(cacheKey)!);
+    }
+    return this.http.get<DigiApiDetailResponse>(`${this.apiUrl}/level/${idOrName}`).pipe(
+      tap(res => this.detailCache.set(cacheKey, res.description))
+    );
+  }
+
+  getAttributeDescription(idOrName: string | number): Observable<DigiApiDetailResponse | string> {
+    const cacheKey = `attribute-${idOrName}`;
+    if (this.detailCache.has(cacheKey)) {
+      return of(this.detailCache.get(cacheKey)!);
+    }
+    return this.http.get<DigiApiDetailResponse>(`${this.apiUrl}/attribute/${idOrName}`).pipe(
+      tap(res => this.detailCache.set(cacheKey, res.description))
+    );
   }
 }
