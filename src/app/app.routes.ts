@@ -7,7 +7,20 @@ export const routes: Routes = [
     children: [
       {
         path: '',
+        redirectTo: 'explorer',
+        pathMatch: 'full'
+      },
+      {
+        path: 'explorer',
         loadComponent: () => import('./features/explorer/list/list.component').then(m => m.ListComponent)
+      },
+      {
+        path: 'skills',
+        loadComponent: () => import('./features/skills/skills.component').then(m => m.SkillsComponent)
+      },
+      {
+        path: 'types',
+        loadComponent: () => import('./features/types/types.component').then(m => m.TypesComponent)
       },
       {
         path: '**',

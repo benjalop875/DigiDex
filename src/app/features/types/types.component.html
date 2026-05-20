@@ -1,0 +1,87 @@
+<div class="flex w-full overflow-hidden">
+  <!-- Main Content -->
+  <div class="flex-1 p-4 md:p-8 pb-32 w-full max-w-full">
+    
+    <!-- Header -->
+    <div class="glass-panel p-6 rounded-xl mb-6 border border-outline-variant/30 md:border-primary/30 md:shadow-[0_8px_30px_-5px_var(--glow-color)] text-center relative z-10 bg-surface/50 backdrop-blur-xl">
+      <h1 class="text-2xl md:text-3xl font-black text-primary-fixed uppercase tracking-tight leading-none wrap-break-words flex items-center justify-center gap-3">
+        <span class="material-symbols-outlined text-3xl">category</span>
+        Type Archives
+      </h1>
+      <p class="font-mono text-on-surface-variant text-xs md:text-sm mt-2">DATABASE OF REGISTERED TYPES</p>
+    </div>
+
+    <!-- Types Grid (Badges) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
+      @if (loading()) {
+        <!-- Loading Skeletons -->
+        @for (item of [1,2,3,4,5]; track $index) {
+          <div class="glass-panel p-6 rounded-xl relative overflow-hidden animate-pulse border border-outline-variant/20 flex flex-col items-center justify-center h-32">
+            <div class="h-6 bg-surface-container-highest/50 rounded w-1/2 mb-2"></div>
+            <div class="h-4 bg-surface-container-highest/50 rounded w-1/4"></div>
+          </div>
+        }
+      } @else {
+        <!-- Real Type Cards -->
+        @for (type of types(); track type.id) {
+          <div class="glass-panel p-6 rounded-xl relative group transition-all duration-300 hover:shadow-[0_0_20px_var(--glow-color)] border border-outline-variant/30 hover:border-primary/50 overflow-hidden bg-surface-container-highest/30 flex flex-col items-center justify-center h-32 text-center hover:-translate-y-1">
+            <h3 class="text-xl font-black text-primary tracking-wider uppercase drop-shadow-[0_0_8px_var(--glow-color)]">{{ type.name }}</h3>
+            <span class="mt-2 font-mono text-[10px] text-primary-fixed-dim bg-primary/10 px-3 py-1 rounded-full border border-primary/20">TYPE_ID: #{{ type.id | number:'3.0-0' }}</span>
+            <div class="absolute bottom-0 left-0 w-full h-0.5 bg-linear-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          </div>
+        } @empty {
+          <div class="col-span-full py-12 text-center text-on-surface-variant font-mono">
+            NO TYPES FOUND IN THE ARCHIVES.
+          </div>
+        }
+      }
+    </div>
+
+    <!-- Pagination Footer -->
+    @if(pageable(); as pageInfo) {
+      @if(pageInfo.totalPages > 1) {
+        <div class="mt-12 flex flex-col md:flex-row justify-center items-center gap-4 glass-panel py-3 px-6 rounded-3xl w-full max-w-3xl mx-auto border border-outline-variant/30 md:border-primary/30 md:shadow-[0_8px_30px_-5px_var(--glow-color)] transition-all duration-300 relative z-10 bg-surface/50 backdrop-blur-xl">
+          
+          <div class="flex flex-wrap justify-center items-center gap-2">
+            <button (click)="changePage(pageInfo.currentPage - 1)" [disabled]="pageInfo.currentPage === 0" class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-primary hover:text-on-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+              <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+            </button>
+            
+            <div class="flex flex-wrap items-center gap-1 font-mono text-sm">
+              @for(item of paginationRange(); track $index) {
+                @if(item === '...') {
+                  <span class="w-6 text-center text-on-surface-variant">...</span>
+                } @else {
+                  <button (click)="changePage($any(item) - 1)" 
+                          class="w-8 h-8 rounded-full flex items-center justify-center transition-colors font-bold"
+                          [class.bg-primary]="item === pageInfo.currentPage + 1"
+                          [class.text-on-primary]="item === pageInfo.currentPage + 1"
+                          [class.hover:bg-surface-container-highest]="item !== pageInfo.currentPage + 1"
+                          [class.text-on-surface-variant]="item !== pageInfo.currentPage + 1">
+                    {{ item }}
+                  </button>
+                }
+              }
+            </div>
+
+            <button (click)="changePage(pageInfo.currentPage + 1)" [disabled]="pageInfo.currentPage >= pageInfo.totalPages - 1" class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-primary hover:text-on-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+              <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2 md:pl-4 md:border-l border-outline-variant/30 mt-4 md:mt-0">
+            <span class="font-bold tracking-wider text-[10px] text-on-surface-variant">GO TO:</span>
+            <input type="number" 
+                   min="1" 
+                   [max]="pageInfo.totalPages" 
+                   [value]="pageInfo.currentPage + 1"
+                   (change)="onPageJump($event)"
+                   (keyup.enter)="onPageJump($event)"
+                   class="w-16 bg-surface-container-highest/50 border border-outline-variant/50 text-on-surface rounded-full px-2 py-1 font-mono text-xs text-center focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+          </div>
+        </div>
+      }
+    }
+
+  </div>
+</div>

@@ -49,3 +49,27 @@ export interface DigiApiDetailResponse {
   name: string;
   description: string;
 }
+
+export interface SkillDetail {
+  id: number;
+  name: string;
+  description: string;
+}
+
+export interface SkillListResponse {
+  content: {
+    name: string;
+    description: string;
+    fields: DigiApiField[];
+  };
+  pageable: Pageable;
+}
+
+export interface TypeListResponse {
+  content: {
+    name: string;
+    description: string;
+    fields: DigiApiField[];
+  };
+  pageable: Pageable;
+}

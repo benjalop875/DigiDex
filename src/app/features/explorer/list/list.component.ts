@@ -133,11 +133,27 @@ export class ListComponent implements OnInit {
     const target = (event.currentTarget as HTMLElement);
     const rect = target.getBoundingClientRect();
     
+    // Calculate initial positions
+    let topPos = rect.top;
+    let leftPos = rect.right + 10;
+    
+    // Prevent tooltip from going off the right edge of the screen
+    // The tooltip is 256px wide (w-64) + 16px padding approx.
+    if (leftPos + 260 > window.innerWidth) {
+        // If it goes off-screen right, show it on the left side instead
+        leftPos = rect.left - 260 - 10;
+        // If it also goes off-screen left (e.g., small mobile screen), just center it horizontally
+        if (leftPos < 0) {
+            leftPos = (window.innerWidth - 260) / 2;
+            topPos = rect.bottom + 20; // Put it below the button
+        }
+    }
+
     this.activeTooltip.set({ 
       text: '', 
       loading: true, 
-      top: rect.top + window.scrollY, // Position near the item
-      left: rect.right + window.scrollX + 10 // to the right of the item
+      top: topPos, 
+      left: leftPos 
     });
 
     if (type === 'attribute') {
