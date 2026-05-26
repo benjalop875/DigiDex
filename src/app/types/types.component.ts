@@ -1,58 +1,41 @@
 import { Component, OnInit, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DigimonService } from '../../core/services/digimon.service';
-import { Pageable, SkillDetail } from '../../core/models/digimon.model';
-import { forkJoin } from 'rxjs';
+import { DigimonService } from '../core/services/digimon.service';
+import { Pageable, DigiApiField } from '../core/models/digimon.model';
 
 @Component({
-  selector: 'app-skills',
+  selector: 'app-types',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './skills.component.html',
+  templateUrl: './types.component.html',
 })
-export class SkillsComponent implements OnInit {
+export class TypesComponent implements OnInit {
   private digimonService = inject(DigimonService);
 
-  skills = signal<SkillDetail[]>([]);
+  types = signal<DigiApiField[]>([]);
   pageable = signal<Pageable | null>(null);
   loading = signal<boolean>(true);
 
   ngOnInit() {
-    this.loadSkills(0);
+    this.loadTypes(0);
   }
 
-  loadSkills(page: number) {
+  loadTypes(page: number) {
     this.loading.set(true);
-    this.digimonService.getSkills(page).subscribe({
+    this.digimonService.getTypes(page).subscribe({
       next: (res) => {
         this.pageable.set(res.pageable);
-        
-        // Fetch details for all 5 skills immediately to show the descriptions
-        const detailRequests = res.content.fields.map(field => 
-          this.digimonService.getSkillDetail(field.id)
-        );
-
-        if (detailRequests.length > 0) {
-          forkJoin(detailRequests).subscribe({
-            next: (details) => {
-              this.skills.set(details);
-              this.loading.set(false);
-              if (typeof window !== 'undefined') {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }
-            },
-            error: () => this.loading.set(false)
-          });
-        } else {
-          this.skills.set([]);
-          this.loading.set(false);
+        this.types.set(res.content.fields);
+        this.loading.set(false);
+        if (typeof window !== 'undefined') {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       },
       error: () => this.loading.set(false)
     });
   }
 
-  // --- Pagination Logic (same as Explorer) ---
+  // --- Pagination Logic (same as Explorer & Skills) ---
   paginationRange = computed(() => {
     const pageInfo = this.pageable();
     if (!pageInfo) return [];
@@ -83,7 +66,7 @@ export class SkillsComponent implements OnInit {
   changePage(page: number) {
     const pageInfo = this.pageable();
     if (pageInfo && page >= 0 && page < pageInfo.totalPages && page !== pageInfo.currentPage) {
-      this.loadSkills(page);
+      this.loadTypes(page);
     }
   }
 

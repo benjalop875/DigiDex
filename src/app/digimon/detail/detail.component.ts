@@ -3,14 +3,13 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DigimonService } from '../../core/services/digimon.service';
 import { DigimonDetail } from '../../core/models/digimon.model';
-import { EvolutionsNetworkComponent } from './evolutions-network/evolutions-network.component';
 
 @Component({
   selector: 'app-digimon-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, EvolutionsNetworkComponent],
-  templateUrl: './digimon-detail.component.html',
-  styleUrl: './digimon-detail.component.css'
+  imports: [CommonModule, RouterLink],
+  templateUrl: './detail.component.html',
+  styleUrl: './detail.component.css'
 })
 export class DigimonDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);

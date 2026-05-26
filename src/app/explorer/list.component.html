@@ -32,14 +32,14 @@
         </label>
 
         <!-- Attribute Custom Dropdown -->
-        <div class="relative shrink-0 w-full sm:w-auto min-w-[140px]">
+        <div class="relative shrink-0 w-full sm:w-auto min-w-35">
           <button type="button" aria-label="Filter by Attribute" (click)="toggleAttributeDropdown($event)" class="w-full bg-surface-container-highest/50 border border-outline-variant/50 text-on-surface rounded-full px-4 py-1.5 font-bold tracking-wider text-[10px] md:text-xs focus:outline-none focus:border-primary cursor-pointer flex items-center justify-between gap-2">
             <span>{{ filterForm.value.attribute ? filterForm.value.attribute : 'ALL ATTRIBUTES' | uppercase }}</span>
             <span class="material-symbols-outlined text-[16px]">expand_more</span>
           </button>
           
           @if (isAttributeOpen()) {
-            <ul class="absolute top-full left-0 mt-2 w-48 bg-surface-container border border-outline-variant/30 rounded-xl shadow-2xl overflow-hidden z-[60] flex flex-col max-h-60 overflow-y-auto card-glow">
+            <ul class="absolute top-full left-0 mt-2 w-48 bg-surface-container border border-outline-variant/30 rounded-xl shadow-2xl overflow-hidden z-60 flex flex-col max-h-60 overflow-y-auto card-glow">
               <li>
                 <button type="button" (click)="selectAttribute('')" class="w-full text-left px-4 py-2 hover:bg-primary/20 text-[10px] md:text-xs font-bold text-on-surface transition-colors border-b border-outline-variant/20">ALL ATTRIBUTES</button>
               </li>
@@ -61,14 +61,14 @@
         </div>
 
         <!-- Level Custom Dropdown -->
-        <div class="relative shrink-0 w-full sm:w-auto min-w-[140px]">
+        <div class="relative shrink-0 w-full sm:w-auto min-w-35">
           <button type="button" aria-label="Filter by Level" (click)="toggleLevelDropdown($event)" class="w-full bg-surface-container-highest/50 border border-outline-variant/50 text-on-surface rounded-full px-4 py-1.5 font-bold tracking-wider text-[10px] md:text-xs focus:outline-none focus:border-primary cursor-pointer flex items-center justify-between gap-2">
             <span>{{ filterForm.value.level ? filterForm.value.level : 'ALL LEVELS' | uppercase }}</span>
             <span class="material-symbols-outlined text-[16px]">expand_more</span>
           </button>
           
           @if (isLevelOpen()) {
-            <ul class="absolute top-full left-0 mt-2 w-48 bg-surface-container border border-outline-variant/30 rounded-xl shadow-2xl overflow-hidden z-[60] flex flex-col max-h-60 overflow-y-auto card-glow">
+            <ul class="absolute top-full left-0 mt-2 w-48 bg-surface-container border border-outline-variant/30 rounded-xl shadow-2xl overflow-hidden z-60 flex flex-col max-h-60 overflow-y-auto card-glow">
               <li>
                 <button type="button" (click)="selectLevel('')" class="w-full text-left px-4 py-2 hover:bg-primary/20 text-[10px] md:text-xs font-bold text-on-surface transition-colors border-b border-outline-variant/20">ALL LEVELS</button>
               </li>
@@ -118,10 +118,10 @@
         @for (digimon of digimons(); track digimon.id) {
           @if ($index < 4) {
             <!-- Eagerly Loaded for LCP -->
-            <div (click)="goToDetail(digimon.id)" class="glass-panel p-4 relative group transition-all duration-300 card-glow overflow-hidden cursor-pointer hover:-translate-y-1">
-              <div class="mb-4 aspect-square relative overflow-hidden bg-surface-container-highest flex items-center justify-center p-4">
-                <img [alt]="digimon.name" class="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-500 scale-110 group-hover:scale-100 drop-shadow-xl" [src]="digimon.image" fetchpriority="high" loading="eager" />
-              </div>
+              <div (click)="goToDetail(digimon.id)" class="glass-panel p-4 relative group transition-all duration-300 card-glow overflow-hidden cursor-pointer hover:-translate-y-1">
+               <div class="mb-4 aspect-square relative overflow-hidden bg-surface-container-highest flex items-center justify-center p-4">
+                  <img [alt]="digimon.name" class="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-500 scale-110 group-hover:scale-100 drop-shadow-xl" [src]="digimon.image" fetchpriority="high" loading="eager" />
+                </div>
               
               <div class="space-y-1">
                 <h3 class="text-xl font-bold text-primary tracking-wide uppercase truncate" [title]="digimon.name">{{ digimon.name }}</h3>
@@ -140,8 +140,8 @@
             <!-- Deferred for Performance -->
             @defer (on viewport) {
               <div (click)="goToDetail(digimon.id)" class="glass-panel p-4 relative group transition-all duration-300 card-glow overflow-hidden cursor-pointer hover:-translate-y-1">
-                <div class="mb-4 aspect-square relative overflow-hidden bg-surface-container-highest flex items-center justify-center p-4">
-                  <img [alt]="digimon.name" class="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-500 scale-110 group-hover:scale-100 drop-shadow-xl" [src]="digimon.image" loading="lazy" />
+                 <div class="mb-4 aspect-square relative overflow-hidden bg-surface-container-highest flex items-center justify-center p-4">
+                   <img [alt]="digimon.name" class="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-500 scale-110 group-hover:scale-100 drop-shadow-xl" [src]="digimon.image" loading="lazy" />
                 </div>
                 
                 <div class="space-y-1">
@@ -225,7 +225,7 @@
 
 <!-- Dynamic Tooltip Overlay -->
 @if(activeTooltip(); as tooltip) {
-  <div class="fixed z-[100] w-64 p-4 glass-panel bg-surface-container-highest/95 rounded-xl border border-primary/30 shadow-[0_4px_25px_var(--glow-color)] pointer-events-none transition-opacity duration-200"
+  <div class="fixed z-100 w-64 p-4 glass-panel bg-surface-container-highest/95 rounded-xl border border-primary/30 shadow-[0_4px_25px_var(--glow-color)] pointer-events-none transition-opacity duration-200"
        [style.top.px]="tooltip.top"
        [style.left.px]="tooltip.left"
        style="transform: translateY(-50%);">

@@ -3,7 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DigimonService } from '../../core/services/digimon.service';
 import { DigimonDetail } from '../../core/models/digimon.model';
-import { EvolutionsNetworkComponent } from '../digimon-detail/evolutions-network/evolutions-network.component';
+import { EvolutionsNetworkComponent } from '../components/evolutions-network/evolutions-network.component';
 
 @Component({
   selector: 'app-evolutions-page',

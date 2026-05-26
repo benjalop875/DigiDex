@@ -2,8 +2,8 @@ import { Component, OnInit, inject, signal, computed, HostListener, ElementRef }
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { DigimonService } from '../../../core/services/digimon.service';
-import { Digimon, Pageable, DigimonQueryParams, DigiApiField } from '../../../core/models/digimon.model';
+import { DigimonService } from '../core/services/digimon.service';
+import { Digimon, Pageable, DigimonQueryParams, DigiApiField } from '../core/models/digimon.model';
 
 @Component({
   selector: 'app-list',
