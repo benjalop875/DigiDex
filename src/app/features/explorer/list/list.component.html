@@ -118,7 +118,7 @@
         @for (digimon of digimons(); track digimon.id) {
           @if ($index < 4) {
             <!-- Eagerly Loaded for LCP -->
-            <div class="glass-panel p-4 relative group transition-all duration-300 card-glow overflow-hidden">
+            <div (click)="goToDetail(digimon.id)" class="glass-panel p-4 relative group transition-all duration-300 card-glow overflow-hidden cursor-pointer hover:-translate-y-1">
               <div class="mb-4 aspect-square relative overflow-hidden bg-surface-container-highest flex items-center justify-center p-4">
                 <img [alt]="digimon.name" class="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-500 scale-110 group-hover:scale-100 drop-shadow-xl" [src]="digimon.image" fetchpriority="high" loading="eager" />
               </div>
@@ -139,7 +139,7 @@
           } @else {
             <!-- Deferred for Performance -->
             @defer (on viewport) {
-              <div class="glass-panel p-4 relative group transition-all duration-300 card-glow overflow-hidden">
+              <div (click)="goToDetail(digimon.id)" class="glass-panel p-4 relative group transition-all duration-300 card-glow overflow-hidden cursor-pointer hover:-translate-y-1">
                 <div class="mb-4 aspect-square relative overflow-hidden bg-surface-container-highest flex items-center justify-center p-4">
                   <img [alt]="digimon.name" class="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-500 scale-110 group-hover:scale-100 drop-shadow-xl" [src]="digimon.image" loading="lazy" />
                 </div>

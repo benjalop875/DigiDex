@@ -1,0 +1,44 @@
+@if (loading()) {
+  <div class="flex-1 p-4 md:p-8 w-full min-h-screen relative overflow-hidden flex items-center justify-center">
+    <div class="absolute inset-0 bg-primary/5 blur-[150px] animate-pulse"></div>
+    <div class="max-w-7xl w-full space-y-6">
+      <div class="h-10 bg-surface-container-highest/30 rounded-full w-64 animate-pulse"></div>
+      <div class="h-[60vh] bg-surface-container-highest/30 rounded-[2rem] w-full animate-pulse"></div>
+    </div>
+  </div>
+}
+@else if (error()) {
+  <div class="flex-1 flex flex-col items-center justify-center p-8 min-h-screen gap-6">
+    <div class="w-24 h-24 rounded-full bg-error/10 flex items-center justify-center text-error mb-4">
+      <span class="material-symbols-outlined text-5xl">warning</span>
+    </div>
+    <p class="font-mono text-on-surface-variant text-center max-w-md">{{ error() }}</p>
+    <button (click)="goBack()" class="mt-4 bg-primary text-on-primary font-bold px-8 py-3 rounded-full hover:shadow-[0_0_20px_var(--glow-color)] transition-all">GO BACK</button>
+  </div>
+}
+@else if (digimon(); as digi) {
+  <div class="flex-1 p-4 md:p-6 lg:p-8 pb-24 w-full min-h-screen relative overflow-hidden flex flex-col items-center">
+    <!-- Ambient Glow -->
+    <div class="absolute top-0 right-0 w-1/2 h-1/2 bg-primary/10 blur-[150px] pointer-events-none rounded-full"></div>
+    <div class="absolute bottom-0 left-0 w-1/2 h-1/2 bg-tertiary/10 blur-[150px] pointer-events-none rounded-full"></div>
+    
+    <div class="max-w-[90rem] w-full relative z-10 flex flex-col gap-6">
+      <!-- Back Button -->
+      <button (click)="goBack()" class="flex items-center gap-3 text-on-surface-variant hover:text-primary transition-colors font-mono text-xs tracking-widest group bg-surface/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/5 w-fit hover:border-primary/50 hover:bg-surface/60">
+        <span class="material-symbols-outlined text-[18px] group-hover:-translate-x-1 transition-transform">arrow_back</span>
+        BACK TO {{ digi.name | uppercase }} DETAILS
+      </button>
+
+      <app-evolutions-network 
+        class="w-full block"
+        [currentDigimonName]="digi.name"
+        [currentDigimonImage]="digi.images[0]?.href || ''"
+        [priorEvolutions]="digi.priorEvolutions"
+        [nextEvolutions]="digi.nextEvolutions"
+        [maxEvosShown]="50"
+        (navigate)="navigateTo($event)"
+        (navigateBack)="goBack()">
+      </app-evolutions-network>
+    </div>
+  </div>
+}

@@ -205,6 +205,10 @@ export class ListComponent implements OnInit {
     }
   }
 
+  goToDetail(id: number): void {
+    this.router.navigate(['/digimon', id]);
+  }
+
   loadDigimons(): void {
     this.loading.set(true);
     

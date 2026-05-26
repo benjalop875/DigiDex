@@ -15,6 +15,14 @@ export const routes: Routes = [
         loadComponent: () => import('./features/explorer/list/list.component').then(m => m.ListComponent)
       },
       {
+        path: 'digimon/:id',
+        loadComponent: () => import('./features/digimon-detail/digimon-detail.component').then(m => m.DigimonDetailComponent)
+      },
+      {
+        path: 'digimon/:id/evolutions',
+        loadComponent: () => import('./features/evolutions/evolutions-page.component').then(m => m.EvolutionsPageComponent)
+      },
+      {
         path: 'skills',
         loadComponent: () => import('./features/skills/skills.component').then(m => m.SkillsComponent)
       },

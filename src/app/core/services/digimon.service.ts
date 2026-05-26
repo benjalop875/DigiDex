@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of, forkJoin } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
-import { DigimonResponse, DigimonQueryParams, DigiApiListResponse, DigiApiDetailResponse, DigiApiField, SkillListResponse, SkillDetail, TypeListResponse } from '../models/digimon.model';
+import { DigimonResponse, DigimonQueryParams, DigiApiListResponse, DigiApiDetailResponse, DigiApiField, SkillListResponse, SkillDetail, TypeListResponse, DigimonDetail } from '../models/digimon.model';
 
 @Injectable({
   providedIn: 'root'
@@ -83,5 +83,9 @@ export class DigimonService {
 
   getTypes(page: number): Observable<TypeListResponse> {
     return this.http.get<TypeListResponse>(`${this.apiUrl}/type`, { params: new HttpParams().set('page', page.toString()) });
+  }
+
+  getDigimonDetail(idOrName: string | number): Observable<DigimonDetail> {
+    return this.http.get<DigimonDetail>(`${this.apiUrl}/digimon/${idOrName}`);
   }
 }

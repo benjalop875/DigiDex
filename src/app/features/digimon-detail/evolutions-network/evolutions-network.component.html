@@ -1,0 +1,112 @@
+<div class="bg-surface/40 backdrop-blur-xl p-5 md:p-8 lg:p-10 rounded-4xl border border-white/10 shadow-2xl evo-animate-in">
+  
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6 md:mb-10">
+    <h2 class="font-mono text-xs md:text-sm tracking-widest text-primary flex items-center gap-3 uppercase">
+      <span class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30 shadow-[0_0_12px_rgba(76,215,246,0.2)]">
+        <span class="material-symbols-outlined text-[16px] md:text-[18px]">account_tree</span>
+      </span>
+      Evolution Network
+    </h2>
+    <div class="flex items-center gap-2 text-[10px] font-mono text-on-surface-variant/60 uppercase tracking-wider">
+      <span class="hidden sm:inline">{{ priorEvolutions.length }} prior</span>
+      <span class="hidden sm:inline text-white/20">|</span>
+      <span class="hidden sm:inline">{{ nextEvolutions.length }} next</span>
+    </div>
+  </div>
+
+  <!-- 3 Column Layout -->
+  <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-6 md:gap-4 lg:gap-6 items-center w-full">
+    
+    <!-- ═══ LEFT: Prior Evolutions ═══ -->
+    <div class="evo-section">
+      <h3 class="text-[10px] md:text-xs font-bold tracking-widest text-primary/80 uppercase mb-5 flex items-center gap-2">
+        <span class="material-symbols-outlined text-[14px]">arrow_back</span>
+        Prior Forms
+        @if (priorEvolutions.length > 0) {
+          <span class="ml-auto bg-primary/15 text-primary px-2 py-0.5 rounded-full text-[9px] font-mono border border-primary/20">{{ priorEvolutions.length }}</span>
+        }
+      </h3>
+
+      @if (priorEvolutions.length > 0) {
+        <div class="evo-grid evo-scroll overflow-y-auto max-h-125 lg:max-h-125 pr-1">
+          @for (evo of priorEvolutions; track evo.id; let i = $index) {
+            <button (click)="onNavigate(evo.id)" class="evo-card evo-card--prior evo-animate-in" [style.animation-delay]="(i * 60) + 'ms'">
+              <div class="evo-card__img-wrap">
+                <img [src]="evo.image" [alt]="evo.digimon" class="evo-card__img" loading="lazy" />
+              </div>
+              <span class="evo-card__name text-on-surface-variant">{{ evo.digimon }}</span>
+            </button>
+          }
+        </div>
+      } @else {
+        <div class="flex-1 flex flex-col items-center justify-center gap-3 min-h-40 opacity-40">
+          <span class="material-symbols-outlined text-4xl text-on-surface-variant">block</span>
+          <span class="text-xs font-mono text-on-surface-variant uppercase tracking-widest">No Prior Data</span>
+        </div>
+      }
+    </div>
+
+    <!-- ═══ CENTER: Current Digimon Hub ═══ -->
+    <div class="center-hub md:min-w-48 lg:min-w-56 xl:min-w-[16rem]">
+      <!-- Flow connector lines (desktop) -->
+      <div class="hidden md:block absolute left-0 top-1/2 w-[calc(50%-4rem)] h-0.5 bg-linear-to-r from-primary/40 to-primary/10 -translate-y-1/2 rounded-full"></div>
+      <div class="hidden md:block absolute right-0 top-1/2 w-[calc(50%-4rem)] h-0.5 bg-linear-to-l from-tertiary/40 to-tertiary/10 -translate-y-1/2 rounded-full"></div>
+
+      <div class="flex flex-col items-center gap-4">
+        <!-- Avatar circle -->
+        <div class="center-hub__avatar bg-surface evo-glow evo-float">
+          <div class="center-hub__inner-glow"></div>
+          <img [src]="currentDigimonImage" [alt]="currentDigimonName" class="w-full h-full object-contain drop-shadow-[0_8px_20px_rgba(76,215,246,0.25)]" />
+        </div>
+
+        <!-- Name & badge -->
+        <div class="flex flex-col items-center gap-2">
+          <span class="text-sm md:text-base lg:text-lg font-black tracking-wider text-primary uppercase text-center leading-tight drop-shadow-sm">{{ currentDigimonName }}</span>
+          <span class="text-[9px] md:text-[10px] bg-primary/20 text-primary border border-primary/30 px-3 py-1 rounded-full font-mono tracking-widest shadow-sm">CURRENT</span>
+        </div>
+
+        <!-- Go to Details button -->
+        <button (click)="navigateBack.emit()" class="mt-2 bg-surface-container/80 backdrop-blur-md border border-primary/30 text-primary font-bold tracking-widest px-5 py-2.5 rounded-full hover:bg-primary hover:text-on-primary hover:shadow-[0_0_20px_rgba(76,215,246,0.3)] transition-all duration-300 hover:-translate-y-0.5 text-[10px] md:text-xs flex items-center gap-2">
+          <span class="material-symbols-outlined text-[14px]">visibility</span>
+          VIEW DETAILS
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ RIGHT: Next Evolutions ═══ -->
+    <div class="evo-section">
+      <h3 class="text-[10px] md:text-xs font-bold tracking-widest text-tertiary/80 uppercase mb-5 flex items-center gap-2">
+        Next Forms
+        @if (nextEvolutions.length > 0) {
+          <span class="bg-tertiary/15 text-tertiary px-2 py-0.5 rounded-full text-[9px] font-mono border border-tertiary/20">{{ nextEvolutions.length }}</span>
+        }
+        <span class="material-symbols-outlined text-[14px] ml-auto">arrow_forward</span>
+      </h3>
+
+      @if (nextEvolutions.length > 0) {
+        <div class="evo-grid evo-scroll overflow-y-auto max-h-125 lg:max-h-125 pr-1">
+          @for (evo of nextEvolutions; track evo.id; let i = $index) {
+            <button (click)="onNavigate(evo.id)" class="evo-card evo-card--next evo-animate-in" [style.animation-delay]="(i * 60) + 'ms'" [title]="evo.condition || evo.digimon">
+              <div class="evo-card__img-wrap">
+                <img [src]="evo.image" [alt]="evo.digimon" class="evo-card__img" loading="lazy" />
+                @if (evo.condition) {
+                  <div class="evo-badge bg-tertiary text-on-tertiary border-2 border-surface">
+                    <span class="material-symbols-outlined text-[11px]">info</span>
+                  </div>
+                }
+              </div>
+              <span class="evo-card__name text-on-surface-variant">{{ evo.digimon }}</span>
+            </button>
+          }
+        </div>
+      } @else {
+        <div class="flex-1 flex flex-col items-center justify-center gap-3 min-h-40 opacity-40">
+          <span class="material-symbols-outlined text-4xl text-on-surface-variant">star</span>
+          <span class="text-xs font-mono text-on-surface-variant uppercase tracking-widest">Terminal Form</span>
+        </div>
+      }
+    </div>
+
+  </div>
+</div>
